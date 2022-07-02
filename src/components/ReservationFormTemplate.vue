@@ -25,12 +25,13 @@
                     <input v-model="reservation.utilisateur.mail" @input="isValidatedMail(reservation.utilisateur.mail)" type="mail" name="mail" id="input-mail" required>
                 </div>
                 <div class="inputAndLabel">
+                
                     <label for="input-date-arrivee">Date d'arrivée</label>
-                    <input v-model="reservation.date_arrivee" @input="isValidatedDate()" class="inputDate" type="date" name="numero" id="input-date-arrivee" required>
+                    <input v-model="reservation.date_arrivee" @change="isValidatedDate()" class="inputDate" type="date" name="numero" id="input-date-arrivee" required>
                 </div>
                 <div class="inputAndLabel">
                     <label for="input-date-depart">Date de départ</label>
-                    <input v-model="reservation.date_depart" @input="isValidatedDate()" class="inputDate" type="date" name="numero" id="input-date-depart" required>
+                    <input v-model="reservation.date_depart" @change="isValidatedDate()" class="inputDate" type="date" name="numero" id="input-date-depart" required>
                 </div>
                 
                 <input v-if="!dataFormAreOk" class="reservationButtonDisabled" type="submit" value="Réserver maintenant" disabled>
@@ -150,9 +151,12 @@ export default {
             this.isValidatedDataForm()
         },
         isValidatedDate: function() {
+            this.datesAreOk = false
+            this.isValidatedDataForm()
             if (this.reservation.date_arrivee != "" && this.reservation.date_depart != "") {
-                const dateArrivee = new Date(this.reservation.date_arrivee)    
-                if((this.reservation.date_arrivee < this.reservation.date_depart) && dateArrivee > Date.now()) {
+                const dateArrivee = new Date(this.reservation.date_arrivee).toISOString()
+                const now = new Date().toISOString()
+                if((this.reservation.date_arrivee < this.reservation.date_depart) && dateArrivee > now) {
                     this.datesAreOk = true
                     this.isValidatedDataForm()
                 } else if ((this.reservation.date_arrivee > this.reservation.date_depart)) {
@@ -170,11 +174,12 @@ export default {
         }, 
         displayInformations: function() {
             window.alert(`
-            Le nom, prénom et pseudo doit contenir entre 2 et 20 caractères
-            Le nom et le prénom ne doit contenir que des lettre
+            Le nom, prénom et pseudo doivent contenir entre 2 et 20 caractères
+            Le nom et le prénom ne doivent contenir que des lettres
             Le pseudo peut contenir des lettres et des chiffres
             Le numéro de salarié doit contenir 4 chiffres
             La date de départ doit être supérieure à la date d'arrivée
+            Le mail doit être au format xxx@yyy.zzz (2 à 4 caractères après le point)
             `)
         }
         

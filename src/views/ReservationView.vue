@@ -5,9 +5,10 @@
       v-if="isValidated == false"
       :housingProps="housing"
       :reservationsProps="currentReservations"
-      @send-data-event="displayReservation"
+      @send-data-event="displayValidatedReservation"
     />
-    <ValidatedReservationTemplate v-if="isValidated == true" :reservationProps="reservation" :housingProps="housing" :reservationWithNumberProps="reservationWithNumber"/>
+    <ValidatedReservationTemplate v-if="isValidated == true" :reservationProps="reservation" 
+    :housingProps="housing" :reservationNumberProps="reservationNumber"/>
 
   </div>
 </template>
@@ -30,7 +31,7 @@ export default {
       isValidated : false,
       reservation : {}, 
       currentReservations : [],
-      reservationWithNumber : {}
+      reservationNumber : ""
     };
   },
   methods: {
@@ -45,13 +46,14 @@ export default {
         console.log(error);
       }
     },
-    displayReservation: function (reservation) {
+    displayValidatedReservation: async function (reservation) {
       this.reservation = reservation;
-      this.isValidated = true
-      this.postReservation(reservation)
+      await this.postReservation(reservation);
+      this.isValidated = true;
     },
     postReservation: async function(reservation) {
-     // on envoie les données récupérées du formulaire sur le service API createReservation qui va se charger lui-même d'appeler createUser
+     // on envoie les données récupérées du formulaire sur le service API createReservation qui 
+     // va se charger lui-même d'appeler createUser
       const dataReservation = {
         id_logement: reservation.id_logement,
         nom : reservation.utilisateur.nom,
@@ -63,7 +65,6 @@ export default {
         date_depart : new Date(reservation.date_depart)
       }
 
-      
       const response = await fetch("http://localhost:9004/reservations", {
         method: "POST",
         headers: {
@@ -72,8 +73,39 @@ export default {
         },
         body: JSON.stringify({reservation : dataReservation}),
       });
-      this.getReservationsByLogementToCreateReservationNumber()
+      let data = await response.json()
+    
+      this.getLastReservationOfLogementToCreateReservationNumber(data.idReservation)
     }, 
+    
+    getLastReservationOfLogementToCreateReservationNumber: async function(idReservation) {
+      // on récupère la dernière réservation pour obtenir l'id de l'utilisateur généré et créer un 
+      //numéro de réservation personnalisé
+      
+      const response = await fetch(`http://localhost:9004/reservations/${idReservation}`)
+      const reservation = await response.json()
+
+      this.reservationNumber = `ImmIT-RES${idReservation}-U${reservation[0].id_utilisateur}`
+  
+      this.updateReservationWithReservationNumber(this.reservationNumber, idReservation)
+    },
+    updateReservationWithReservationNumber: async function(reservationNumber, reservationId) {
+      const reservationNumberToSend = {
+        numero_reservation : reservationNumber
+      }
+      try {
+          const response = await fetch(`http://localhost:9004/reservations/${reservationId}`, {
+            method: "PATCH",
+            headers: {
+              Accept: "application/json",
+              "Content-type": "application/json", 
+            },
+            body: JSON.stringify(reservationNumberToSend),
+          });
+        } catch (error) {
+          console.log(error);
+        }
+    },
     getReservationsByLogementToDisplay: async function() {
       const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
       try {
@@ -93,51 +125,7 @@ export default {
       } catch(error) {
         console.log(error)
       }
-    },
-    getReservationsByLogementToCreateReservationNumber: async function() {
-      // on récupère la liste de toutes les réservations du logement, et on filtre celui ajouté juste avant, celà permet de récupérer l'id autogénéré après le post
-      let reservationFiltered = {}
-      const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-      try {
-        const response = await fetch(`http://localhost:9004/logements/${this.$route.params.housingId}/reservations`)
-        const data = await response.json()
-
-        reservationFiltered = data.filter(element => {
-          return (element.date_arrivee == new Date(this.reservation.date_arrivee).toISOString() && element.date_depart == new Date(this.reservation.date_depart).toISOString() && element.id_logement == this.reservation.id_logement)
-        })
-      } catch(error) {
-        console.log(error)
-      }
-      console.log(reservationFiltered)
-      this.reservationWithNumber = {
-        date_arrivee : new Date(reservationFiltered[0].date_arrivee).toLocaleDateString("fr", options),
-        date_depart : new Date(reservationFiltered[0].date_depart).toLocaleDateString("fr", options),
-        id : reservationFiltered[0].id,
-        id_logement : reservationFiltered[0].id_logement,
-        id_utilisateur : reservationFiltered[0].id_utilisateur,
-        numero_reservation : "ImmIT-RES" + reservationFiltered[0].id + "-U" + reservationFiltered[0].id_utilisateur
-      }
-      this.updateReservationWithReservationNumber(this.reservationWithNumber.numero_reservation, this.reservationWithNumber.id)
-    },
-    updateReservationWithReservationNumber: async function(reservationNumber, reservationId) {
-      const reservationNumberToSend = {
-        numero_reservation : reservationNumber
-      }
-      console.log(reservationNumberToSend)
-      try {
-          const response = await fetch(`http://localhost:9004/reservations/${reservationId}`, {
-            method: "PATCH",
-            headers: {
-              Accept: "application/json",
-              "Content-type": "application/json", 
-            },
-            body: JSON.stringify(reservationNumberToSend),
-          });
-        } catch (error) {
-          console.log(error);
-        }
-    },
-    
+    }
   },
   created: function () {
     this.getLogementById();

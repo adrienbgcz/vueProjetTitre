@@ -2,57 +2,61 @@
   <section>
     <div class="reservation">
       <p class="validatedReservationMessage">Réservation validée !</p>
-      <p>Vous avez réservé le logement <span>"{{housingProps.titre}}"</span> du <span>{{reservationProps.date_arrivee}}</span> au <span>{{reservationProps.date_depart}}</span></p>
-      <p><span>Numéro de réservation :</span> {{reservationWithNumberProps.numero_reservation}}</p>
-      <p><span>Nom :</span> {{reservationProps.utilisateur.nom}}</p>
-      <p><span>Prénom :</span> {{reservationProps.utilisateur.prenom}}</p>
+      <p>
+        Vous avez réservé le logement <span>"{{ housingProps.titre }}"</span> du
+        <span>{{ reservationProps.date_arrivee }}</span> au
+        <span>{{ reservationProps.date_depart }}</span>
+      </p>
+      <p><span>Numéro de réservation :</span> {{ reservationNumberProps }}</p>
+      <p><span>Nom :</span> {{ reservationProps.utilisateur.nom }}</p>
+      <p><span>Prénom :</span> {{ reservationProps.utilisateur.prenom }}</p>
     </div>
-    <button class="downloadButton" @click="printWindow">Télécharger en pdf</button>
+    <button class="downloadButton" @click="printWindow">
+      Télécharger en pdf
+    </button>
   </section>
 </template>
 
 <script>
 export default {
-    name: "ReservationValidatedTemplate",
-    props: ["reservationProps", "housingProps", "reservationWithNumberProps"], 
-    methods: {
-      //on créé une méthode en front afin de retrouver l'id de la réservation en fonction des dates et du logement pour créer un numéro de réservation
-      createReservationNumber: function() {
-        console.log(this.reservationProps)
-      },
-      printWindow: function() {
-        window.print()
-      }
-    }, 
-    created: function() {
-      this.createReservationNumber
-    }
-    
-
-}
+  name: "ReservationValidatedTemplate",
+  props: ["reservationProps", "housingProps", "reservationNumberProps"],
+  methods: {
+    //on créé une méthode en front afin de retrouver l'id de la réservation en fonction des dates et du logement pour créer un numéro de réservation
+    createReservationNumber: function() {
+      console.log(this.reservationProps);
+    },
+    printWindow: function() {
+      window.print();
+    },
+  },
+  created: function() {
+    this.createReservationNumber;
+  },
+};
 </script>
 
 <style scoped>
 .reservation {
-    margin-top : 100px;
-    width: 500px;
-    border: solid;
-    box-shadow: 10px 10px 23px -7px rgba(0,0,0,0.66);
-    padding: 20px;
-    border-width : 3px;
-    border-color: #0B295D;
-    border-radius: 10px;
+  margin-top: 100px;
+  width: 500px;
+  border: solid;
+  box-shadow: 10px 10px 23px -7px rgba(0, 0, 0, 0.66);
+  padding: 20px;
+  border-width: 3px;
+  border-color: #0b295d;
+  border-radius: 10px;
 }
 
 section {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    width: 1000px;
-    margin: auto;
-    font-family: lato;
-    color: #0B295D;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 1000px;
+  margin: auto;
+  font-family: lato;
+  color: #0b295d;
 }
 
 span {
@@ -67,55 +71,49 @@ span {
 }
 
 .downloadButton {
-    font-size: 16px;
-    background-color: #0B295D;
-    color: white;
-    height: 40px;
-    width: 200px;
-    margin-top: 50px;
-    border-radius: 10px;
-    border: none;
-    display:flex;
-    justify-content: center;
-    align-items: center;
+  font-size: 16px;
+  background-color: #0b295d;
+  color: white;
+  height: 40px;
+  width: 200px;
+  margin-top: 50px;
+  border-radius: 10px;
+  border: none;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .downloadButton:hover {
-    color: #0B295D;
-    background-color: white;
-    border:solid;
-    cursor: pointer;
+  color: #0b295d;
+  background-color: white;
+  border: solid;
+  cursor: pointer;
 }
-
 
 @media screen and (max-width: 1200px) {
   .reservation {
-      width: 500px;
+    width: 500px;
   }
 
   section {
-        width: 90%;
-        margin: auto;
-        font-family: lato;
-        color: #0B295D;
-    }
-
+    width: 90%;
+    margin: auto;
+    font-family: lato;
+    color: #0b295d;
+  }
 }
 
 @media screen and (max-width: 650px) {
   .reservation {
-      width: 95%
+    width: 95%;
   }
 
   section {
-        width: 90%;
-        margin: auto;
-        font-family: lato;
-        color: #0B295D;
-    }
-
+    width: 90%;
+    margin: auto;
+    font-family: lato;
+    color: #0b295d;
+  }
 }
-
-
-
 </style>
